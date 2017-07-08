@@ -26,6 +26,10 @@ public class GlobalFiring : MonoBehaviour
     public GameObject RocketTower;
     public GameObject SonicWaveTower;
 
+    public int LaserTowerCost;
+    public int RocketTowerCost;
+    public int SonicTowerCost;
+
     public float LaserFireRate;
     public float RocketTowerCD;
     public float LaserTowerCD;
@@ -54,7 +58,7 @@ public class GlobalFiring : MonoBehaviour
 
     public void PlaceLaserTower()
     {
-        if (GlobalController.ResourceUnit < 50)
+        if (GlobalController.ResourceUnit < LaserTowerCost)
         {
             GameObject.Find("TowerHint").GetComponent<Text>().text = "Not enough resource!";
             GameObject.Find("TowerHint").GetComponent<UIFeedBacks>().DisplayText();
@@ -67,7 +71,7 @@ public class GlobalFiring : MonoBehaviour
 
     public void PlaceRocketTower()
     {
-        if (GlobalController.ResourceUnit < 100)
+        if (GlobalController.ResourceUnit < RocketTowerCost)
         {
             GameObject.Find("TowerHint").GetComponent<Text>().text = "Not enough resource!";
             GameObject.Find("TowerHint").GetComponent<UIFeedBacks>().DisplayText();
@@ -106,9 +110,21 @@ public class GlobalFiring : MonoBehaviour
             {
                 Vector2 touchpositionVP = Camera.main.ScreenToViewportPoint(Input.GetTouch(0).position);
                 Vector2 spawnpos = Camera.main.ViewportToWorldPoint(new Vector3(touchpositionVP.x, 0.3f));
-                if (touchpositionVP.y > 0.2)
+                if (touchpositionVP.x > 0.08)
                 {
+                    if (IsTowerObstructed(spawnpos))
+                    {
+                        return;
+                    }
                     Instantiate(towerToPlace, spawnpos, Quaternion.identity);
+                    if (towerToPlace.tag == "LaserTower")
+                    {
+                        GlobalController.ChangeResource(-LaserTowerCost);
+                    }
+                    if (towerToPlace.tag == "RocketTower")
+                    {
+                        GlobalController.ChangeResource(-RocketTowerCost);
+                    }
                     isPlacingTower = false;
                     foreach (var btn in GameObject.FindGameObjectsWithTag("TowerButton"))
                     {
@@ -118,6 +134,65 @@ public class GlobalFiring : MonoBehaviour
                 }
             }
         }
+    }
+
+    private void FixedUpdate()
+    {
+        for (int i = 0; i < laserTowerCD.Count; i++)
+        {
+            laserTowerCD[i] = (laserTowerCD[i] > 0) ? laserTowerCD[i] - Time.fixedDeltaTime : 0f;
+        }
+        rocketTowerCD = (rocketTowerCD > 0) ? rocketTowerCD - Time.fixedDeltaTime : 0f;
+    }
+
+    private bool IsTowerObstructed(Vector2 spawnpos)
+    {
+        foreach (var tower in LaserTowers)
+        {
+            if (IsTowerObstructedType(tower, spawnpos))
+            {
+                return true;
+            }
+        }
+        var rockettowers = GameObject.FindGameObjectsWithTag("RocketTower");
+        if (RocketTowers.Count != rockettowers.Length)
+        {
+            RocketTowers.Clear();
+            foreach (var rockettower in rockettowers)
+            {
+                RocketTowers.Add(rockettower);
+            }
+        }
+        foreach (var tower in RocketTowers)
+        {
+            if (IsTowerObstructedType(tower, spawnpos))
+            {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private bool IsTowerObstructedType(GameObject tower, Vector2 spawnpos)
+    {
+        //TODO: Better calculation needed for obstruction detection
+        float extend = tower.GetComponent<Collider2D>().bounds.extents.x;
+        float xposmin = tower.transform.position.x - extend * 2f;
+        float xposmax = tower.transform.position.x + extend * 2f;
+        Debug.Log(spawnpos.x + "vs" + xposmin);
+        if (spawnpos.x > xposmin && spawnpos.x < xposmax)
+        {
+            GameObject.Find("TowerHint").GetComponent<Text>().text = "Not enough space!";
+            GameObject.Find("TowerHint").GetComponent<UIFeedBacks>().DisplayText();
+            return true;
+        }
+        if (spawnpos.x > xposmin && spawnpos.x < xposmax)
+        {
+            GameObject.Find("TowerHint").GetComponent<Text>().text = "Not enough space!";
+            GameObject.Find("TowerHint").GetComponent<UIFeedBacks>().DisplayText();
+            return true;
+        }
+        return false;
     }
 
     public void FireLasers()
@@ -211,14 +286,5 @@ public class GlobalFiring : MonoBehaviour
         {
             rockettower.transform.GetChild(0).GetChild(0).GetChild(0).GetComponent<Renderer>().enabled = true;
         }
-    }
-
-    private void FixedUpdate()
-    {
-        for (int i = 0; i < laserTowerCD.Count; i++)
-        {
-            laserTowerCD[i] = (laserTowerCD[i] > 0) ? laserTowerCD[i] - Time.fixedDeltaTime : 0f;
-        }
-        rocketTowerCD = (rocketTowerCD > 0) ? rocketTowerCD - Time.fixedDeltaTime : 0f;
     }
 }

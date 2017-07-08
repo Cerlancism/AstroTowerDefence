@@ -2,9 +2,13 @@
 using UnityEngine.UI;
 using System.Collections;
 using UnityEngine.SceneManagement;
+using UnityEngine.Audio;
+using System;
 
 public class LoadScene : MonoBehaviour 
 {
+    public AudioMixer MasterAudio;
+
     private void Start()
     {
         //Audio volume settings, using try as SetActive may throw error as espcially reloaded menu after gameplay since its already inactive for some
@@ -17,6 +21,10 @@ public class LoadScene : MonoBehaviour
             if (!PlayerPrefs.HasKey("MusicVolume"))
             {
                 PlayerPrefs.SetInt("MusicVolume", 1);
+            }
+            if (!PlayerPrefs.HasKey("Vibrate"))
+            {
+                PlayerPrefs.SetInt("Vibrate", 1);
             }
 
             if (PlayerPrefs.GetInt("AudioVolume") == 0)
@@ -39,6 +47,16 @@ public class LoadScene : MonoBehaviour
                 MusicUnMute();
                 GameObject.Find("MusicUnmute").SetActive(false);
             }
+            if (PlayerPrefs.GetInt("Vibrate") == 0)
+            {
+                VibrateOff();
+                GameObject.Find("NoVibrate").SetActive(false);
+            }
+            else
+            {
+                VibrateOn();
+                GameObject.Find("Vibrate").SetActive(false);
+            }
         }
         catch(System.Exception e)
         {
@@ -51,6 +69,19 @@ public class LoadScene : MonoBehaviour
         }
         GameObject.Find("TxtHighscore").GetComponent<Text>().text = "Highscore: " + PlayerPrefs.GetInt("HighScore");
 
+    }
+
+    public void VibrateOn()
+    {
+        PlayerPrefs.SetInt("Vibrate", 1);
+        Handheld.Vibrate();
+        GlobalController.AllowShake = true;
+    }
+
+    public void VibrateOff()
+    {
+        PlayerPrefs.SetInt("Vibrate", 0);
+        GlobalController.AllowShake = false;
     }
 
     //After pressing start in menu
@@ -71,25 +102,25 @@ public class LoadScene : MonoBehaviour
     //Audio setting methods
     public void Mute()
     {
-        AudioListener.volume = 0;
+        MasterAudio.SetFloat("SFXVolume", -80f);
         PlayerPrefs.SetInt("AudioVolume", 0);
     }
 
     public void UnMute()
     {
-        AudioListener.volume = 1;
+        MasterAudio.SetFloat("SFXVolume", 0f);
         PlayerPrefs.SetInt("AudioVolume", 1);
     }
 
     public void MusicMute()
     {
-        GameObject.Find("GlobalManager").GetComponent<AudioSource>().Stop();
+        MasterAudio.SetFloat("MusicVolume", -80f);
         PlayerPrefs.SetInt("MusicVolume", 0);
     }
 
     public void MusicUnMute()
     {
-        GameObject.Find("GlobalManager").GetComponent<AudioSource>().Play(); ;
+        MasterAudio.SetFloat("MusicVolume", 0f);
         PlayerPrefs.SetInt("MusicVolume", 1);
     }
 

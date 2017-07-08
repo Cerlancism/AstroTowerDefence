@@ -32,6 +32,9 @@ public class GlobalController : MonoBehaviour
     public AudioClip LevelupAudio;
     public static AudioClip LevelupAudioStatic;
 
+    //Vibration Setting
+    public static bool AllowShake = true;
+
     //===================
     // Private Variables
     //===================
@@ -47,9 +50,6 @@ public class GlobalController : MonoBehaviour
     private static int repairCost = 33;
     private static int repairRate = 10;
     private static int maxGI = 100;
-
-    //Rocket is hidden before wave 2
-    private static Vector2 rocketTowerPosition;
 
     //Wave win condition is reaching certain resource count
     private static int resourceGoal;
@@ -72,9 +72,10 @@ public class GlobalController : MonoBehaviour
         Highscore = PlayerPrefs.GetInt("HighScore");
 
         //initialise ui audio
-        uiAudio = GetComponent<AudioSource>();
+        uiAudio = GetComponents<AudioSource>()[1];
+        Debug.Log("Audio UI: " + uiAudio.outputAudioMixerGroup.audioMixer);
         LevelupAudioStatic = LevelupAudio;
-        uiAudio.PlayOneShot(LevelupAudioStatic, 2);
+        uiAudio.PlayOneShot(LevelupAudioStatic, 1);
 
         //Start the round
         ChangeResource(200);
@@ -112,7 +113,6 @@ public class GlobalController : MonoBehaviour
                 currentshaked = currentshaked + shakedist;
                 Plateform.transform.Translate(0f, shakedist * Time.deltaTime * 60, 0);
             }
-            Debug.Log(currentshaked + " current shaked vs to shake " + -toshake);
             if (currentshaked <= (-toshake))
             {
                 shakedown = false;
@@ -137,12 +137,13 @@ public class GlobalController : MonoBehaviour
     private static void IncreaseRound()
     {
         CurrentRound++;
-        uiAudio.PlayOneShot(LevelupAudioStatic, 3);
+        uiAudio.PlayOneShot(LevelupAudioStatic, 1);
         //Check and do the wave parameters
         switch (CurrentRound)
         {
             case Meteor.Round.r1:
                 Meteor.CurrentRound = Meteor.Round.r1;
+                Physics2D.gravity = new Vector2(0, -9.81f);
                 maxGI = 100;
                 repairRate = 10;
                 repairCost = 33;
@@ -189,6 +190,10 @@ public class GlobalController : MonoBehaviour
     {
         GroundShake = true;
         PlateformShakeTime = 0.5f;
+        if (AllowShake)
+        {
+            Handheld.Vibrate();
+        }
     }
 
     //When repair button is pressed
