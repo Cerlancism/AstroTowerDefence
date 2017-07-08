@@ -92,4 +92,5 @@ public class LoadScene : MonoBehaviour
         GameObject.Find("GlobalManager").GetComponent<AudioSource>().Play(); ;
         PlayerPrefs.SetInt("MusicVolume", 1);
     }
+
 }
