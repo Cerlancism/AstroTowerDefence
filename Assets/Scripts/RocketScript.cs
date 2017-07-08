@@ -43,6 +43,7 @@ public class RocketScript : MonoBehaviour
     //---------------------------------------------------------------------------------
     protected void Awake() 
 	{
+
 	}
 
 	//---------------------------------------------------------------------------------
@@ -110,11 +111,12 @@ public class RocketScript : MonoBehaviour
             {
                 turning.x = turning.x - turnSpeed;
             }
+            //Optimasation for direction calculation needed
             turning = new Vector2(turning.x + changeorigin.x * 0.1f, turning.y + Mathf.Abs(changeorigin.x * 0.01f));
-            turning.x = (turning.x > 1) ? 1 : turning.x;
-            turning.x = (turning.x < -1) ? -1 : turning.x;
-            turning.y = (turning.y < -1) ? -1 : turning.y;
-            turning.y = (turning.y < -1) ? -1 : turning.y;
+            turning.x = (turning.x > 1.5f) ? 1.5f : turning.x;
+            turning.x = (turning.x < -1.5f) ? -1.5f : turning.x;
+            turning.y = (turning.y > 0.8f) ? 0.8f : turning.y;
+            turning.y = (turning.y < -0.8f) ? -0.8f : turning.y;
         }
         
         if (!collided)
@@ -126,6 +128,11 @@ public class RocketScript : MonoBehaviour
             transform.rotation = Quaternion.AngleAxis(angle - 90, Vector3.forward);
         }
 
+    }
+
+    private void OnDrawGizmos()
+    {
+        Gizmos.DrawSphere(turning, 0.2f);
     }
 
     private void OnTriggerEnter2D(Collider2D collision)
