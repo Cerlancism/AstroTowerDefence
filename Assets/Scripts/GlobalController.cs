@@ -239,6 +239,8 @@ public class GlobalController : MonoBehaviour
         {
             Highscore = ResourceUnit + GroundIntegrity;
             GameObject.Find("TxtCurrentHighscore").GetComponent<Text>().text = "Current Highscore: " + Highscore;
+            //Save highscore
+            PlayerPrefs.SetInt("HighScore", Highscore);
         }
         //Check if wave objective is reached
         if (ResourceUnit >= resourceGoal)
@@ -270,6 +272,8 @@ public class GlobalController : MonoBehaviour
         {
             Highscore = ResourceUnit + GroundIntegrity;
             GameObject.Find("TxtCurrentHighscore").GetComponent<Text>().text = "Current Highscore: " + Highscore;
+            //Save highscore
+            PlayerPrefs.SetInt("HighScore", Highscore);
         }
         if (GroundIntegrity <= 0)
         {
@@ -282,8 +286,6 @@ public class GlobalController : MonoBehaviour
             GameObject.Find("GestureObject").GetComponent<LongPressHandler>().enabled = false;
             GlobalFiring.LaserAutoFire = false;
 
-            //Save highscore
-            PlayerPrefs.SetInt("HighScore", Highscore);
             //drop the ground
             GroundDrop = true;
         }

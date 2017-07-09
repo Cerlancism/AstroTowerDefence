@@ -209,6 +209,19 @@ public class MeteorGeneralScript : MonoBehaviour
                 HitPoints = HitPoints - 4;
             }
         }
+
+        if (collision.gameObject.tag == "SonicWave")
+        {
+            if (HitPoints <= 1)
+            {
+                gameObject.GetComponent<PolygonCollider2D>().enabled = false;
+                DestroyMeteor();
+            }
+            else if (HitPoints <= 3)
+            {
+                HitPoints--;
+            }
+        }
     }
     //Methods to destroy meteors and spawn its children
     private void DestroyMeteor()
@@ -282,12 +295,6 @@ public class MeteorGeneralScript : MonoBehaviour
         child2.GetComponent<Rigidbody2D>().velocity = r2d.velocity;
         child.GetComponent<Rigidbody2D>().AddForce(Vector2.left * Random.Range(r2d.mass * r2d.mass, r2d.mass * r2d.mass * 4));
         child2.GetComponent<Rigidbody2D>().AddForce(Vector2.right * Random.Range(r2d.mass * r2d.mass, r2d.mass* r2d.mass * 8));
-    }
-
-
-    private void OnDestroy()
-    {
-        
     }
 
 }

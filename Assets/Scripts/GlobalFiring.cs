@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
+//Controls tower placement and tower firing
 public class GlobalFiring : MonoBehaviour
 {
     public static List<GameObject> LaserTowers;
@@ -12,6 +13,7 @@ public class GlobalFiring : MonoBehaviour
 
     private List<float> laserTowerCD;
     private float rocketTowerCD;
+    private float sonicTowerCD;
 
     public static Vector2 LaserTarget;
     public static bool LaserAutoFire;
@@ -33,6 +35,7 @@ public class GlobalFiring : MonoBehaviour
     public float LaserFireRate;
     public float RocketTowerCD;
     public float LaserTowerCD;
+    public float SonicTowerCD;
 
     private int laserTowerOrder = 0;
 
@@ -82,6 +85,19 @@ public class GlobalFiring : MonoBehaviour
         Invoke("StartPlacingTowers", 0.1f);
     }
 
+    public void PlaceSonicTower()
+    {
+        if (GlobalController.ResourceUnit < SonicTowerCost)
+        {
+            GameObject.Find("TowerHint").GetComponent<Text>().text = "Not enough resource!";
+            GameObject.Find("TowerHint").GetComponent<UIFeedBacks>().DisplayText();
+            GameObject.Find("BtnCloseTower").SetActive(false);
+            return;
+        }
+        towerToPlace = SonicWaveTower;
+        Invoke("StartPlacingTowers", 0.1f);
+    }
+
     private void StartPlacingTowers()
     {
         isPlacingTower = true;
@@ -104,6 +120,7 @@ public class GlobalFiring : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        //Tower placement detection
         if (isPlacingTower)
         {
             if (Input.touchCount == 1)
@@ -125,6 +142,10 @@ public class GlobalFiring : MonoBehaviour
                     {
                         GlobalController.ChangeResource(-RocketTowerCost);
                     }
+                    if (towerToPlace.tag == "SonicTower")
+                    {
+                        GlobalController.ChangeResource(-SonicTowerCost);
+                    }
                     isPlacingTower = false;
                     foreach (var btn in GameObject.FindGameObjectsWithTag("TowerButton"))
                     {
@@ -134,8 +155,18 @@ public class GlobalFiring : MonoBehaviour
                 }
             }
         }
+
+        //Device shake detection
+        if (Input.acceleration.z > 0.5f)
+        {
+            if (sonicTowerCD == 0)
+            {
+                FireSonicWaves();
+            }
+        }
     }
 
+    //Cooldown timers in fixed update
     private void FixedUpdate()
     {
         for (int i = 0; i < laserTowerCD.Count; i++)
@@ -143,8 +174,10 @@ public class GlobalFiring : MonoBehaviour
             laserTowerCD[i] = (laserTowerCD[i] > 0) ? laserTowerCD[i] - Time.fixedDeltaTime : 0f;
         }
         rocketTowerCD = (rocketTowerCD > 0) ? rocketTowerCD - Time.fixedDeltaTime : 0f;
+        sonicTowerCD = (sonicTowerCD > 0) ? sonicTowerCD - Time.fixedDeltaTime : 0f;
     }
 
+    //Detact if a tower is already placed in a target location
     private bool IsTowerObstructed(Vector2 spawnpos)
     {
         foreach (var tower in LaserTowers)
@@ -173,6 +206,7 @@ public class GlobalFiring : MonoBehaviour
         return false;
     }
 
+    //Extension method for tower placement obstruction placement from above
     private bool IsTowerObstructedType(GameObject tower, Vector2 spawnpos)
     {
         //TODO: Better calculation needed for obstruction detection
@@ -285,6 +319,33 @@ public class GlobalFiring : MonoBehaviour
         foreach (var rockettower in RocketTowers)
         {
             rockettower.transform.GetChild(0).GetChild(0).GetChild(0).GetComponent<Renderer>().enabled = true;
+        }
+    }
+
+    private void FireSonicWaves()
+    {
+        var sonictowers = GameObject.FindGameObjectsWithTag("SonicTower");
+        if (SonicwaveTowers.Count != sonictowers.Length)
+        {
+            SonicwaveTowers.Clear();
+            foreach (var sonicwavetower in sonictowers)
+            {
+                SonicwaveTowers.Add(sonicwavetower);
+            }
+        }
+        foreach (var sonicwavetower in SonicwaveTowers)
+        {
+            sonicwavetower.transform.GetChild(0).GetChild(0).GetComponent<Animator>().SetTrigger("Fire");
+            Invoke("SpawnSonicWave", sonicwavetower.transform.GetChild(0).GetChild(0).GetComponent<Animator>().GetCurrentAnimatorClipInfo(0).Length * 0.75f);
+        }
+        sonicTowerCD = SonicTowerCD;
+    }
+
+    private void SpawnSonicWave()
+    {
+        foreach (var sonicwavetower in SonicwaveTowers)
+        {
+            Instantiate(SonicWave, new Vector2(sonicwavetower.transform.position.x, sonicwavetower.transform.position.y + 0.5f), Quaternion.identity);
         }
     }
 }

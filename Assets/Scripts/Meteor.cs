@@ -151,7 +151,7 @@ public class Meteor : MonoBehaviour
     public void StartRamping()
     {
         CancelInvoke("AddMeteor");
-        InvokeRepeating("RampingCounter", 0, 2f);
+        InvokeRepeating("RampingCounter", 0, 1f);
         Debug.Log("Ramping Rate: " + spawnRate);
         transform.Translate(-1, 1, 0);
         transform.localScale = new Vector3(transform.localScale.x * 4, transform.localScale.y * 2, 1);

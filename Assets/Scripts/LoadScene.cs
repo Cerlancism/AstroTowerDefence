@@ -74,7 +74,6 @@ public class LoadScene : MonoBehaviour
     public void VibrateOn()
     {
         PlayerPrefs.SetInt("Vibrate", 1);
-        Handheld.Vibrate();
         GlobalController.AllowShake = true;
     }
 
@@ -122,6 +121,11 @@ public class LoadScene : MonoBehaviour
     {
         MasterAudio.SetFloat("MusicVolume", 0f);
         PlayerPrefs.SetInt("MusicVolume", 1);
+    }
+
+    public void VibrateDevice()
+    {
+        Handheld.Vibrate();
     }
 
 }

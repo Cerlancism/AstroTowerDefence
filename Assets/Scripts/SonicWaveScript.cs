@@ -20,5 +20,9 @@ public class SonicWaveScript : MonoBehaviour {
         var spriteColor = gameObject.GetComponent<SpriteRenderer>().color;
         gameObject.GetComponent<SpriteRenderer>().color = new Color(spriteColor.r, spriteColor.g, spriteColor.b, spriteColor.a - 0.005f);
 
+        if (Camera.main.WorldToViewportPoint(transform.position).y > 1.5f)
+        {
+            Destroy(gameObject);
+        }
     }
 }
