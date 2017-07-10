@@ -1,4 +1,0 @@
-sceneSetups:
-- path: Assets/Earth.unity
-  isLoaded: 1
-  isActive: 1
